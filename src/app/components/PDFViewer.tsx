@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 
@@ -51,12 +52,18 @@ const PDFViewer = () => {
     >
       <Document
         file='/sample.pdf'
-        onLoadSuccess={({ originalWidth, originalHeight }) => {
+        onLoadSuccess={({
+          originalWidth,
+          originalHeight,
+        }: {
+          originalWidth: number;
+          originalHeight: number;
+        }) => {
           setPageDimensions({ width: originalWidth, height: originalHeight });
         }}
-        onLoadError={(err) => console.error(err)}
+        onLoadError={(err: Error) => console.error(err)}
         onLoadProgress={(data) => console.log('Loading...', data)}
-        onSourceError={(err) => console.error('Source error:', err)}
+        onSourceError={(err: Error) => console.error('Source error:', err)}
       >
         <Page
           pageNumber={1}
