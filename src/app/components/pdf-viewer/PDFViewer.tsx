@@ -2,16 +2,22 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+// import {
+//   LoadingProgressData,
+// } from 'pdfjs-dist';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import { PDFPageProxy } from 'pdfjs-dist';
+import { useStore } from '@/store/pdfStore';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
-const PDFViewer = () => {
+const PDFViewer = (fileUrl: string) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
   const [pageDimensions, setPageDimensions] = useState({ width: 1, height: 1 });
+  const [pdfData, setPdfData] = useState(null);
+  const pdfPages = useStore((s) => s.pdfPages);
 
   useEffect(() => {
     const resize = () => {
@@ -35,15 +41,8 @@ const PDFViewer = () => {
     ) || 1;
 
   useEffect(() => {
-    console.log(
-      'container',
-      containerSize,
-      'pdf',
-      pageDimensions,
-      'scale',
-      scale
-    );
-  }, [containerSize, pageDimensions, scale]);
+    console.log('zesty', pdfPages);
+  }, [pdfPages]);
 
   return (
     <div
@@ -62,14 +61,18 @@ const PDFViewer = () => {
           setPageDimensions({ width: originalWidth, height: originalHeight });
         }}
         onLoadError={(err: Error) => console.error(err)}
-        onLoadProgress={(data) => console.log('Loading...', data)}
         onSourceError={(err: Error) => console.error('Source error:', err)}
       >
         <Page
           pageNumber={1}
           scale={scale}
-          onLoadSuccess={({ width, height }) => {
+          onLoadSuccess={(
+            page: PDFPageProxy,
+            width: number,
+            height: number
+          ) => {
             setPageDimensions({ width, height });
+            page.getTextContent().then((content) => setPdfData(content));
           }}
         />
       </Document>
